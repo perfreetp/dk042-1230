@@ -49,6 +49,8 @@ export type OrderStatus =
   | 'cancelled'
   | 'refunded'
 
+export type InvoiceStatus = 'none' | 'pending' | 'issued'
+
 export interface Order {
   id: string
   orderNo: string
@@ -67,6 +69,8 @@ export interface Order {
   totalAmount: number
   paidAmount: number
   createTime: string
+  invoiceStatus?: InvoiceStatus
+  invoiceId?: string
   serviceProgress?: ServiceProgress[]
   checkReminders?: CheckReminder[]
   updates?: ServiceUpdate[]

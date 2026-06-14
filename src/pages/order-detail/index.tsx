@@ -3,7 +3,10 @@ import { View, Text, ScrollView, Input, Picker, Textarea } from '@tarojs/compone
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import Avatar from '@/components/Avatar'
 import AppButton from '@/components/AppButton'
+import Tag from '@/components/Tag'
+import StatusBadge from '@/components/StatusBadge'
 import { useOrderStore } from '@/store/order'
+import type { OrderStatus, InvoiceStatus } from '@/types'
 import styles from './index.module.scss'
 
 const statusTextMap: Record<string, { text: string; desc: string }> = {
@@ -13,6 +16,12 @@ const statusTextMap: Record<string, { text: string; desc: string }> = {
   completed: { text: '服务已完成', desc: '感谢您的使用，欢迎评价陪诊服务' },
   cancelled: { text: '订单已取消', desc: '如有疑问请联系客服' },
   refunded: { text: '已退款', desc: '退款已原路退回' }
+}
+
+const invoiceStatusText: Record<InvoiceStatus, string> = {
+  none: '未申请',
+  pending: '开票中（1-3个工作日内发送邮箱）',
+  issued: '已开票'
 }
 
 const timeSlots = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '14:00', '14:30', '15:00', '15:30', '16:00']
@@ -30,7 +39,7 @@ const OrderDetailPage: React.FC = () => {
   const updateOrderStatus = useOrderStore((s) => s.updateOrderStatus)
 
   const order = useMemo(() => getOrder(id) || storeOrders[0], [id, getOrder, storeOrders])
-  const statusInfo = statusTextMap[order?.status || 'pending']
+  const statusInfo = order ? statusTextMap[order.status] : null
 
   const [showReschedule, setShowReschedule] = useState(false)
   const [newDate, setNewDate] = useState(order?.appointmentDate || '2026-06-15')
@@ -41,21 +50,29 @@ const OrderDetailPage: React.FC = () => {
   const [idCard, setIdCard] = useState('')
   const [extraNotes, setExtraNotes] = useState('')
 
-  useDidShow(() => {
+  useEffect(() => {
     if (order) {
       setNewDate(order.appointmentDate)
       setNewTime(order.appointmentTime)
     }
-    if (initialAction === 'reschedule') {
-      setShowReschedule(true)
-    }
+  }, [order?.id, order?.appointmentDate, order?.appointmentTime])
+
+  useDidShow(() => {
+    if (initialAction === 'reschedule') setShowReschedule(true)
+    if (initialAction === 'supplement') setShowSupplement(true)
   })
 
-  const handleContact = () => Taro.showToast({ title: '正在呼叫陪诊员...', icon: 'none' })
-
-  const handleReschedule = () => {
-    setShowReschedule(true)
+  if (!order || !statusInfo) {
+    return (
+      <View style={{ padding: 100, textAlign: 'center', color: '#86909C' }}>
+        <Text>订单不存在</Text>
+      </View>
+    )
   }
+
+  const handleContact = () => Taro.showToast({ title: '正在呼叫陪诊员...', icon: 'none' })
+  const handleReschedule = () => setShowReschedule(true)
+  const handleSupplement = () => setShowSupplement(true)
 
   const handleConfirmReschedule = () => {
     if (!newDate || !newTime) {
@@ -67,7 +84,7 @@ const OrderDetailPage: React.FC = () => {
       content: `将预约时间改为 ${newDate} ${newTime}？`,
       success: (res) => {
         if (res.confirm) {
-          rescheduleOrder(id, newDate, newTime)
+          rescheduleOrder(order.id, newDate, newTime)
           Taro.showToast({ title: '改期成功', icon: 'success' })
           setShowReschedule(false)
         }
@@ -81,7 +98,7 @@ const OrderDetailPage: React.FC = () => {
       content: '确定要取消该订单吗？已支付金额将在1-3个工作日原路退回。',
       success: (res) => {
         if (res.confirm) {
-          cancelOrder(id)
+          cancelOrder(order.id)
           Taro.showToast({ title: '取消成功', icon: 'success' })
         }
       }
@@ -89,12 +106,8 @@ const OrderDetailPage: React.FC = () => {
   }
 
   const handlePay = () => {
-    updateOrderStatus(id, 'confirmed')
+    updateOrderStatus(order.id, 'confirmed')
     Taro.showToast({ title: '支付成功', icon: 'success' })
-  }
-
-  const handleSupplement = () => {
-    setShowSupplement(true)
   }
 
   const handleConfirmSupplement = () => {
@@ -102,7 +115,7 @@ const OrderDetailPage: React.FC = () => {
       Taro.showToast({ title: '请填写补充资料', icon: 'none' })
       return
     }
-    supplementInfo(id, {
+    supplementInfo(order.id, {
       healthNotes: healthNotes || undefined,
       idCard: idCard || undefined,
       extraNotes: extraNotes || undefined
@@ -117,19 +130,24 @@ const OrderDetailPage: React.FC = () => {
   const handleService = () => Taro.navigateTo({ url: `/pages/in-service/index?id=${order.id}` })
   const handleReview = () => Taro.navigateTo({ url: `/pages/review/index?id=${order.id}` })
   const handleInvoice = () => Taro.navigateTo({ url: `/pages/invoice/index?orderId=${order.id}` })
+  const handleStart = () => {
+    updateOrderStatus(order.id, 'in_service')
+    Taro.showToast({ title: '服务开始', icon: 'success' })
+  }
 
   const renderActions = () => {
-    const btns = []
-    if (!order) return btns
+    const btns: React.ReactNode[] = []
     if (order.status === 'pending') {
       btns.push(<AppButton key="cancel" text="取消订单" type="ghost" size="lg" onClick={handleCancel} />)
       btns.push(<AppButton key="pay" text="立即支付" type="primary" size="lg" onClick={handlePay} />)
     } else if (order.status === 'confirmed') {
+      btns.push(<AppButton key="supplement" text="补充资料" type="ghost" size="lg" onClick={handleSupplement} />)
       btns.push(<AppButton key="cancel" text="取消订单" type="ghost" size="lg" onClick={handleCancel} />)
       btns.push(<AppButton key="reschedule" text="申请改期" type="outline" size="lg" onClick={handleReschedule} />)
-      btns.push(<AppButton key="contact" text="联系陪诊员" type="primary" size="lg" onClick={handleContact} />)
+      btns.push(<AppButton key="start" text="开始服务" type="primary" size="lg" onClick={handleStart} />)
     } else if (order.status === 'in_service') {
       btns.push(<AppButton key="supplement" text="补充资料" type="outline" size="lg" onClick={handleSupplement} />)
+      btns.push(<AppButton key="contact" text="联系陪诊员" type="outline" size="lg" onClick={handleContact} />)
       btns.push(<AppButton key="view" text="查看进展" type="primary" size="lg" onClick={handleService} />)
     } else if (order.status === 'completed') {
       btns.push(<AppButton key="invoice" text="申请发票" type="outline" size="lg" onClick={handleInvoice} />)
@@ -138,19 +156,16 @@ const OrderDetailPage: React.FC = () => {
     return btns
   }
 
-  if (!order) {
-    return (
-      <View style={{ padding: 100, textAlign: 'center', color: '#86909C' }}>
-        <Text>订单不存在</Text>
-      </View>
-    )
-  }
+  const invoiceStatus: InvoiceStatus = (order.invoiceStatus || (order.status === 'completed' ? 'none' : undefined)) as InvoiceStatus
 
   return (
     <View className={styles.page}>
       <ScrollView scrollY enhanced showScrollbar={false}>
         <View className={styles.statusHeader}>
-          <Text className={styles.statusText}>{statusInfo.text}</Text>
+          <View style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <Text className={styles.statusText}>{statusInfo.text}</Text>
+            <StatusBadge status={order.status as OrderStatus} />
+          </View>
           <Text className={styles.statusDesc}>{statusInfo.desc}</Text>
         </View>
 
@@ -160,7 +175,7 @@ const OrderDetailPage: React.FC = () => {
             <Avatar src={order.companionAvatar} name={order.companionName} size="md" />
             <View className={styles.info}>
               <Text className={styles.name}>{order.companionName}</Text>
-              <Text className={styles.rating}>★ 4.9 · 陪诊师资格证</Text>
+              <Text className={styles.rating}>★ 4.9 · 从业5年 · 陪诊师资格证</Text>
             </View>
             <Text className={styles.contactBtn} onClick={handleContact}>联系</Text>
           </View>
@@ -170,8 +185,22 @@ const OrderDetailPage: React.FC = () => {
           <Text className={styles.sectionTitle}>就诊信息</Text>
           <View className={styles.infoRow}>
             <Text className={styles.label}>就诊人</Text>
-            <Text className={styles.value}>{order.patient.name} · {order.patient.gender === 'female' ? '女' : '男'} · {order.patient.age}岁</Text>
+            <Text className={styles.value}>
+              {order.patient.name} · {order.patient.gender === 'female' ? '女' : '男'} · {order.patient.age}岁
+            </Text>
           </View>
+          {order.patient.phone && (
+            <View className={styles.infoRow}>
+              <Text className={styles.label}>联系电话</Text>
+              <Text className={styles.value}>{order.patient.phone}</Text>
+            </View>
+          )}
+          {order.patient.idCard && (
+            <View className={styles.infoRow}>
+              <Text className={styles.label}>身份证号</Text>
+              <Text className={styles.value}>{order.patient.idCard}</Text>
+            </View>
+          )}
           <View className={styles.infoRow}>
             <Text className={styles.label}>医院</Text>
             <Text className={styles.value}>{order.hospital}</Text>
@@ -182,7 +211,9 @@ const OrderDetailPage: React.FC = () => {
           </View>
           <View className={styles.infoRow}>
             <Text className={styles.label}>就诊时间</Text>
-            <Text className={styles.value}>{order.appointmentDate} {order.appointmentTime}</Text>
+            <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <Text className={styles.value}>{order.appointmentDate} {order.appointmentTime}</Text>
+            </View>
           </View>
           <View className={styles.infoRow}>
             <Text className={styles.label}>集合地点</Text>
@@ -192,13 +223,9 @@ const OrderDetailPage: React.FC = () => {
             <Text className={styles.label}>预计时长</Text>
             <Text className={styles.value}>{order.estimatedDuration}小时</Text>
           </View>
-          <View className={styles.infoRow}>
-            <Text className={styles.label}>联系电话</Text>
-            <Text className={styles.value}>{order.patient.phone}</Text>
-          </View>
           {order.patient.healthNotes && (
             <View className={styles.infoRow}>
-              <Text className={styles.label}>健康备注</Text>
+              <Text className={styles.label}>健康说明</Text>
               <Text className={styles.value}>{order.patient.healthNotes}</Text>
             </View>
           )}
@@ -213,7 +240,7 @@ const OrderDetailPage: React.FC = () => {
         <View className={styles.section}>
           <Text className={styles.sectionTitle}>费用明细</Text>
           <View className={styles.priceRow}>
-            <Text className={styles.label}>陪诊服务费</Text>
+            <Text className={styles.label}>陪诊服务费（¥{order.totalAmount / order.estimatedDuration} × {order.estimatedDuration}h）</Text>
             <Text className={styles.value}>¥{order.totalAmount}.00</Text>
           </View>
           <View className={styles.priceRow}>
@@ -236,6 +263,38 @@ const OrderDetailPage: React.FC = () => {
             <Text className={styles.label}>创建时间</Text>
             <Text className={styles.value}>{order.createTime}</Text>
           </View>
+          {invoiceStatus && (
+            <View className={styles.infoRow}>
+              <Text className={styles.label}>开票状态</Text>
+              <View style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Tag
+                  text={invoiceStatusText[invoiceStatus]}
+                  type={
+                    invoiceStatus === 'issued'
+                      ? 'primary'
+                      : invoiceStatus === 'pending'
+                      ? 'info'
+                      : 'default'
+                  }
+                  size="sm"
+                />
+                {invoiceStatus === 'none' && order.status === 'completed' && (
+                  <Text
+                    className={styles.invoiceEntry}
+                    onClick={handleInvoice}
+                  >
+                    去申请 ›
+                  </Text>
+                )}
+              </View>
+            </View>
+          )}
+          {order.invoiceId && (
+            <View className={styles.infoRow}>
+              <Text className={styles.label}>发票编号</Text>
+              <Text className={styles.value}>{order.invoiceId}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -255,27 +314,27 @@ const OrderDetailPage: React.FC = () => {
                 <Text className={styles.formPicker}>{newDate} ›</Text>
               </View>
             </Picker>
-            <View className={styles.formRow} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Text className={styles.formLabel} style={{ marginBottom: 16 }}>就诊时间</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-                {timeSlots.map((slot) => (
-                  <Text
-                    key={slot}
-                    style={{
-                      padding: '12rpx 32rpx',
-                      borderRadius: 32,
-                      background: newTime === slot ? '#E8F7EF' : '#F2F3F5',
-                      color: newTime === slot ? '#2BA471' : '#4E5969',
-                      fontSize: 28
-                    }}
-                    onClick={() => setNewTime(slot)}
-                  >
-                    {slot}
-                  </Text>
-                ))}
-              </View>
+            <View style={{ padding: '16rpx 0 8rpx' }}>
+              <Text className={styles.formLabel}>就诊时间</Text>
             </View>
-            <View style={{ flexDirection: 'row', gap: 16, marginTop: 32 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingBottom: 16 }}>
+              {timeSlots.map((slot) => (
+                <Text
+                  key={slot}
+                  style={{
+                    padding: '12rpx 32rpx',
+                    borderRadius: 32,
+                    background: newTime === slot ? '#E8F7EF' : '#F2F3F5',
+                    color: newTime === slot ? '#2BA471' : '#4E5969',
+                    fontSize: 28
+                  }}
+                  onClick={() => setNewTime(slot)}
+                >
+                  {slot}
+                </Text>
+              ))}
+            </View>
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
               <AppButton text="取消" type="ghost" size="lg" onClick={() => setShowReschedule(false)} />
               <AppButton text="确认改期" type="primary" size="lg" onClick={handleConfirmReschedule} />
             </View>
@@ -286,14 +345,15 @@ const OrderDetailPage: React.FC = () => {
       {showSupplement && (
         <View className={styles.modalMask} onClick={() => setShowSupplement(false)}>
           <View className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <Text className={styles.modalTitle}>补充资料</Text>
-            <View className={styles.formRow}>
-              <Text className={styles.formLabel}>健康情况</Text>
+            <Text className={styles.modalTitle}>补充就诊资料</Text>
+
+            <View style={{ padding: '8rpx 0' }}>
+              <Text className={styles.formLabel}>健康情况说明（过敏/慢病史/行动情况）</Text>
             </View>
             <Textarea
               value={healthNotes}
               onInput={(e) => setHealthNotes(e.detail.value)}
-              placeholder="如：过敏史、慢性病史、行动是否方便等"
+              placeholder="如：青霉素过敏、高血压病史8年、可自行行走等"
               style={{
                 width: '100%',
                 minHeight: 160,
@@ -304,25 +364,36 @@ const OrderDetailPage: React.FC = () => {
               }}
               maxlength={300}
             />
-            <View className={styles.formRow}>
-              <Text className={styles.formLabel}>身份证号</Text>
-              <Input
-                value={idCard}
-                onInput={(e) => setIdCard(e.detail.value)}
-                placeholder="部分医院挂号需要"
-                style={{ flex: 1, fontSize: 28, textAlign: 'right' }}
-              />
+
+            <View style={{ marginTop: 24 }}>
+              <Text className={styles.formLabel}>身份证号（部分医院挂号需要）</Text>
             </View>
-            <View className={styles.formRow}>
-              <Text className={styles.formLabel}>其他备注</Text>
+            <Input
+              value={idCard}
+              onInput={(e) => setIdCard(e.detail.value)}
+              placeholder="请输入18位身份证号"
+              style={{
+                width: '100%',
+                marginTop: 12,
+                background: '#F7F8FA',
+                borderRadius: 16,
+                padding: 20,
+                fontSize: 28
+              }}
+              maxlength={18}
+            />
+
+            <View style={{ marginTop: 24 }}>
+              <Text className={styles.formLabel}>其他需要告知陪诊员的备注</Text>
             </View>
             <Textarea
               value={extraNotes}
               onInput={(e) => setExtraNotes(e.detail.value)}
-              placeholder="其他需要告知陪诊员的信息..."
+              placeholder="如：需推轮椅、要取上次报告、挂专家号等..."
               style={{
                 width: '100%',
                 minHeight: 160,
+                marginTop: 12,
                 background: '#F7F8FA',
                 borderRadius: 16,
                 padding: 20,
@@ -330,6 +401,7 @@ const OrderDetailPage: React.FC = () => {
               }}
               maxlength={300}
             />
+
             <View style={{ flexDirection: 'row', gap: 16, marginTop: 32 }}>
               <AppButton text="取消" type="ghost" size="lg" onClick={() => setShowSupplement(false)} />
               <AppButton text="确认提交" type="primary" size="lg" onClick={handleConfirmSupplement} />

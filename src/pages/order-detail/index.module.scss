@@ -182,15 +182,23 @@
     &:last-child {
       border-bottom: none;
     }
-  }
 
-  .formLabel {
-    font-size: $font-size-md;
-    color: $color-text-secondary;
-  }
+    .formLabel {
+      font-size: $font-size-md;
+      color: $color-text-secondary;
+      font-weight: $font-weight-medium;
+    }
 
-  .formPicker {
-    font-size: $font-size-md;
-    color: $color-text-primary;
+    .formPicker {
+      font-size: $font-size-md;
+      color: $color-text-primary;
+    }
   }
+}
+
+.invoiceEntry {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
 }

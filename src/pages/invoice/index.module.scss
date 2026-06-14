@@ -60,16 +60,30 @@
     border-bottom: none;
   }
 
-  .label {
+  .formLabel {
     width: 160rpx;
     flex-shrink: 0;
     font-size: $font-size-md;
     color: $color-text-secondary;
   }
 
+  .formInput {
+    flex: 1;
+    font-size: $font-size-md;
+    color: $color-text-primary;
+    text-align: right;
+  }
+
   .required {
     color: $color-error;
     margin-right: 4rpx;
+  }
+
+  .label {
+    width: 160rpx;
+    flex-shrink: 0;
+    font-size: $font-size-md;
+    color: $color-text-secondary;
   }
 
   .input {
@@ -86,36 +100,116 @@
 }
 
 .orderRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md;
+    border: 2rpx solid $color-divider;
+    border-radius: $radius-md;
+    margin-bottom: $spacing-sm;
+    gap: $spacing-sm;
+    transition: all $transition-fast;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.selectedRow {
+      border-color: $color-primary;
+      background: $color-primary-bg;
+    }
+
+    &.disabledRow {
+      opacity: 0.55;
+    }
+
+    .checkbox {
+      width: 40rpx;
+      height: 40rpx;
+      border-radius: 50%;
+      border: 2rpx solid $color-border;
+      background: $color-bg-card;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24rpx;
+      color: $color-text-white;
+      flex-shrink: 0;
+    }
+
+    &.selectedRow .checkbox {
+      background: $color-primary;
+      border-color: $color-primary;
+    }
+
+    .orderInfo {
+      flex: 1;
+      min-width: 0;
+
+      .orderNo {
+        font-size: $font-size-md;
+        color: $color-text-primary;
+        font-weight: $font-weight-semibold;
+        margin-bottom: 4rpx;
+      }
+
+      .orderDesc {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        margin-bottom: 4rpx;
+      }
+
+      .orderSub {
+        font-size: $font-size-xs;
+        color: $color-text-tertiary;
+      }
+    }
+
+    .amount {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-error;
+      flex-shrink: 0;
+    }
+  }
+
+.selectAllBtn,
+.clearAllBtn {
+  font-size: $font-size-sm;
+  padding: 6rpx $spacing-sm;
+  border-radius: $radius-sm;
+}
+
+.selectAllBtn {
+  color: $color-primary;
+  background: $color-primary-bg;
+  font-weight: $font-weight-semibold;
+}
+
+.clearAllBtn {
+  color: $color-text-tertiary;
+  background: $color-bg-hover;
+}
+
+.summaryRow {
+  margin: $spacing-md $page-padding;
+  padding: $spacing-md $spacing-lg;
+  background: linear-gradient(135deg, rgba($color-primary, 0.08), rgba($color-info, 0.08));
+  border-radius: $radius-lg;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-md 0;
-  border-bottom: 1rpx solid $color-divider;
 
-  &:last-child {
-    border-bottom: none;
+  .summaryLabel {
+    font-size: $font-size-md;
+    color: $color-text-secondary;
   }
 
-  .orderInfo {
-    flex: 1;
-
-    .orderNo {
-      font-size: $font-size-md;
-      color: $color-text-primary;
-      margin-bottom: $spacing-xs;
-    }
-
-    .orderDesc {
-      font-size: $font-size-sm;
-      color: $color-text-tertiary;
-    }
-  }
-
-  .amount {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-semibold;
-    color: $color-error;
+  .summaryAmount {
+    font-size: 44rpx;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
   }
 }
 
@@ -153,14 +247,21 @@
   justify-content: space-between;
   gap: $spacing-md;
 
-  .totalLabel {
-    font-size: $font-size-md;
+  .footerLabel {
+    font-size: $font-size-sm;
     color: $color-text-secondary;
+    margin-bottom: 4rpx;
   }
 
-  .totalAmount {
+  .footerAmount {
     font-size: $font-size-xl;
     font-weight: $font-weight-bold;
     color: $color-error;
+  }
+
+  .footerSub {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-left: 8rpx;
   }
 }

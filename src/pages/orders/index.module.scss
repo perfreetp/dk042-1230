@@ -3,6 +3,7 @@
 .page {
   min-height: 100vh;
   background: $color-bg-page;
+  padding-bottom: 60rpx;
 }
 
 .tabs {
@@ -15,19 +16,23 @@
   border-bottom: 1rpx solid $color-divider;
   display: flex;
   flex-direction: row;
+  overflow-x: auto;
 
   .tab {
-    flex: 1;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 96rpx;
+    padding: 0 $spacing-md;
     position: relative;
+    margin-right: $spacing-sm;
 
     .tabText {
       font-size: $font-size-md;
       color: $color-text-secondary;
       transition: all $transition-fast;
+      white-space: nowrap;
     }
 
     &.active {
@@ -81,32 +86,90 @@
     .cardBody {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: $spacing-md;
 
       .info {
         flex: 1;
         margin-left: $spacing-md;
+        min-width: 0;
 
         .patientRow {
-          margin-bottom: $spacing-xs;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: $spacing-sm;
+          gap: $spacing-sm;
 
           .name {
-            font-size: $font-size-md;
-            font-weight: $font-weight-medium;
+            font-size: $font-size-lg;
+            font-weight: $font-weight-semibold;
             color: $color-text-primary;
-            margin-right: $spacing-sm;
-          }
 
-          .dept {
-            font-size: $font-size-sm;
-            color: $color-text-secondary;
+            .patientMeta {
+              font-size: $font-size-sm;
+              color: $color-text-tertiary;
+              font-weight: 400;
+            }
           }
         }
 
-        .timeRow {
-          font-size: $font-size-sm;
-          color: $color-text-secondary;
+        .row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin-bottom: $spacing-xs;
+          gap: 4rpx;
+          flex-wrap: wrap;
+
+          .rowIcon {
+            font-size: 28rpx;
+            width: 32rpx;
+            text-align: center;
+            flex-shrink: 0;
+          }
+
+          .rowLabel {
+            font-size: $font-size-sm;
+            color: $color-text-tertiary;
+            flex-shrink: 0;
+          }
+
+          .rowValue {
+            font-size: $font-size-sm;
+            color: $color-text-secondary;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+
+        .notesRow {
+          margin-top: $spacing-sm;
+          padding: $spacing-sm $spacing-md;
+          background: $color-warning-bg;
+          border-radius: $radius-sm;
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 4rpx;
+
+          .notesLabel {
+            font-size: $font-size-xs;
+            color: $color-warning;
+            font-weight: $font-weight-semibold;
+            flex-shrink: 0;
+          }
+
+          .notesValue {
+            font-size: $font-size-xs;
+            color: $color-text-secondary;
+            flex: 1;
+            line-height: $line-height-normal;
+          }
         }
       }
     }
@@ -114,28 +177,70 @@
     .cardFooter {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       padding-top: $spacing-md;
       border-top: 1rpx solid $color-divider;
 
-      .amount {
-        font-size: $font-size-sm;
-        color: $color-text-secondary;
+      .footerLeft {
+        flex: 1;
+        min-width: 0;
 
-        .amountNum {
-          font-size: $font-size-lg;
-          font-weight: $font-weight-bold;
-          color: $color-error;
-          margin-left: 8rpx;
+        .metaRow {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          margin-bottom: $spacing-xs;
+
+          &:last-child { margin-bottom: 0; }
+
+          .metaLabel {
+            font-size: $font-size-xs;
+            color: $color-text-tertiary;
+            flex-shrink: 0;
+          }
+
+          .metaValue {
+            font-size: $font-size-xs;
+            color: $color-text-secondary;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
         }
       }
 
-      .actions {
+      .amountBlock {
         display: flex;
-        flex-direction: row;
-        gap: $spacing-sm;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-left: $spacing-md;
+        flex-shrink: 0;
+
+        .amountLabel {
+          font-size: $font-size-xs;
+          color: $color-text-tertiary;
+          margin-bottom: 4rpx;
+        }
+
+        .amountNum {
+          font-size: $font-size-xl;
+          font-weight: $font-weight-bold;
+          color: $color-error;
+          line-height: 1.1;
+        }
       }
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: row;
+      gap: $spacing-sm;
+      justify-content: flex-end;
+      padding-top: $spacing-md;
+      margin-top: $spacing-sm;
+      border-top: 1rpx dashed $color-divider;
+      flex-wrap: wrap;
     }
   }
 }
@@ -143,8 +248,15 @@
 .empty {
   padding: 200rpx 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: $spacing-md;
+
+  .emptyIcon {
+    font-size: 80rpx;
+    opacity: 0.5;
+  }
 
   .emptyText {
     font-size: $font-size-md;
