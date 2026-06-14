@@ -3,14 +3,15 @@ import { View, Text, Input } from '@tarojs/components'
 import Taro, { useRouter } from '@tarojs/taro'
 import classnames from 'classnames'
 import AppButton from '@/components/AppButton'
-import { orders } from '@/data/orders'
+import { useOrderStore } from '@/store/order'
 import styles from './index.module.scss'
 
 const InvoicePage: React.FC = () => {
   const router = useRouter()
   const orderId = router.params.orderId
+  const storeOrders = useOrderStore((s) => s.orders)
 
-  const completedOrders = useMemo(() => orders.filter((o) => o.status === 'completed'), [])
+  const completedOrders = useMemo(() => storeOrders.filter((o) => o.status === 'completed'), [storeOrders])
   const selectedOrderId = orderId || completedOrders[0]?.id || ''
 
   const [type, setType] = useState<'personal' | 'company'>('personal')

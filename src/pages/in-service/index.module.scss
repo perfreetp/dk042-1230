@@ -85,6 +85,20 @@
   }
 }
 
+.advanceBtn {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  padding: $spacing-xs $spacing-sm;
+  background: $color-primary-bg;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.updateCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
 .reminderList {
   .reminderItem {
     display: flex;
@@ -92,9 +106,14 @@
     align-items: center;
     padding: $spacing-md 0;
     border-bottom: 1rpx solid $color-divider;
+    transition: all $transition-fast;
 
     &:last-child {
       border-bottom: none;
+    }
+
+    &.completed {
+      opacity: 0.6;
     }
 
     .iconBox {
@@ -130,8 +149,11 @@
 
     .status {
       font-size: $font-size-sm;
+      padding: 4rpx 16rpx;
+      border-radius: $radius-sm;
+      background: $color-bg-hover;
 
-      &.done { color: $color-success; }
+      &.done { color: $color-success; background: $color-success-bg; }
       &.pending { color: $color-text-tertiary; }
     }
   }

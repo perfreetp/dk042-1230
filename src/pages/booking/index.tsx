@@ -5,6 +5,7 @@ import classnames from 'classnames'
 import AppButton from '@/components/AppButton'
 import Avatar from '@/components/Avatar'
 import { companions, hospitals, departments } from '@/data/companions'
+import { useOrderStore } from '@/store/order'
 import styles from './index.module.scss'
 
 const durations = [2, 3, 4, 5, 6]
@@ -13,6 +14,7 @@ const slots = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '14:00', '1
 const BookingPage: React.FC = () => {
   const router = useRouter()
   const companionId = router.params.companionId
+  const addOrder = useOrderStore((s) => s.addOrder)
 
   const companion = useMemo(() => companions.find((c) => c.id === companionId) || companions[0], [companionId])
 
@@ -27,6 +29,7 @@ const BookingPage: React.FC = () => {
   const [meetingPoint, setMeetingPoint] = useState('')
   const [duration, setDuration] = useState(4)
   const [conditionNotes, setConditionNotes] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const totalPrice = useMemo(() => companion.pricePerHour * duration, [companion, duration])
 
@@ -41,14 +44,35 @@ const BookingPage: React.FC = () => {
       content: `确认预约${companion.name}陪诊服务？共${duration}小时，费用¥${totalPrice}`,
       success: (res) => {
         if (res.confirm) {
+          setSubmitting(true)
           Taro.showLoading({ title: '提交中...' })
           setTimeout(() => {
+            const orderId = addOrder({
+              companionId: companion.id,
+              companionName: companion.name,
+              companionAvatar: companion.avatar,
+              patient: {
+                name: patientName,
+                gender: patientGender,
+                age: parseInt(patientAge, 10) || 0,
+                phone: patientPhone
+              },
+              hospital,
+              department,
+              appointmentDate: date,
+              appointmentTime: timeSlot,
+              meetingPoint,
+              estimatedDuration: duration,
+              conditionNotes,
+              totalAmount: totalPrice
+            })
             Taro.hideLoading()
+            setSubmitting(false)
             Taro.showToast({ title: '预约成功', icon: 'success' })
             setTimeout(() => {
-              Taro.switchTab({ url: '/pages/orders/index' })
-            }, 1500)
-          }, 1000)
+              Taro.redirectTo({ url: `/pages/order-detail/index?id=${orderId}` })
+            }, 1200)
+          }, 800)
         }
       }
     })
@@ -236,7 +260,7 @@ const BookingPage: React.FC = () => {
       </View>
 
       <View className={styles.footer}>
-        <AppButton text={`提交订单  ¥${totalPrice}`} type="primary" size="block" onClick={handleSubmit} />
+        <AppButton text={`提交订单  ¥${totalPrice}`} type="primary" size="block" loading={submitting} onClick={handleSubmit} />
       </View>
     </View>
   )

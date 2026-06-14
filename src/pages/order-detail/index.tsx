@@ -1,45 +1,129 @@
-import React, { useMemo } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
-import Taro, { useRouter } from '@tarojs/taro'
+import React, { useState, useMemo, useEffect } from 'react'
+import { View, Text, ScrollView, Input, Picker, Textarea } from '@tarojs/components'
+import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import Avatar from '@/components/Avatar'
 import AppButton from '@/components/AppButton'
-import { orders } from '@/data/orders'
+import { useOrderStore } from '@/store/order'
 import styles from './index.module.scss'
 
 const statusTextMap: Record<string, { text: string; desc: string }> = {
   pending: { text: '待支付', desc: '请尽快完成支付，超时订单将自动取消' },
-  confirmed: { text: '待服务', desc: '陪诊员将在就诊当天提前到达' },
-  in_service: { text: '服务进行中', desc: '陪诊员正在陪同就诊，点击查看实时进展' },
+  confirmed: { text: '待服务', desc: '陪诊员将在就诊当天提前到达集合地点' },
+  in_service: { text: '服务进行中', desc: '陪诊员正在陪同就诊，可查看实时进展' },
   completed: { text: '服务已完成', desc: '感谢您的使用，欢迎评价陪诊服务' },
   cancelled: { text: '订单已取消', desc: '如有疑问请联系客服' },
   refunded: { text: '已退款', desc: '退款已原路退回' }
 }
 
+const timeSlots = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '14:00', '14:30', '15:00', '15:30', '16:00']
+
 const OrderDetailPage: React.FC = () => {
   const router = useRouter()
-  const id = router.params.id
-  const order = useMemo(() => orders.find((o) => o.id === id) || orders[0], [id])
-  const statusInfo = statusTextMap[order.status]
+  const id = router.params.id || ''
+  const initialAction = router.params.action
 
-  const handleContact = () => Taro.showToast({ title: '正在联系陪诊员...', icon: 'none' })
-  const handleReschedule = () => Taro.showToast({ title: '改期功能开发中', icon: 'none' })
+  const getOrder = useOrderStore((s) => s.getOrder)
+  const storeOrders = useOrderStore((s) => s.orders)
+  const cancelOrder = useOrderStore((s) => s.cancelOrder)
+  const rescheduleOrder = useOrderStore((s) => s.rescheduleOrder)
+  const supplementInfo = useOrderStore((s) => s.supplementInfo)
+  const updateOrderStatus = useOrderStore((s) => s.updateOrderStatus)
+
+  const order = useMemo(() => getOrder(id) || storeOrders[0], [id, getOrder, storeOrders])
+  const statusInfo = statusTextMap[order?.status || 'pending']
+
+  const [showReschedule, setShowReschedule] = useState(false)
+  const [newDate, setNewDate] = useState(order?.appointmentDate || '2026-06-15')
+  const [newTime, setNewTime] = useState(order?.appointmentTime || '09:00')
+
+  const [showSupplement, setShowSupplement] = useState(false)
+  const [healthNotes, setHealthNotes] = useState('')
+  const [idCard, setIdCard] = useState('')
+  const [extraNotes, setExtraNotes] = useState('')
+
+  useDidShow(() => {
+    if (order) {
+      setNewDate(order.appointmentDate)
+      setNewTime(order.appointmentTime)
+    }
+    if (initialAction === 'reschedule') {
+      setShowReschedule(true)
+    }
+  })
+
+  const handleContact = () => Taro.showToast({ title: '正在呼叫陪诊员...', icon: 'none' })
+
+  const handleReschedule = () => {
+    setShowReschedule(true)
+  }
+
+  const handleConfirmReschedule = () => {
+    if (!newDate || !newTime) {
+      Taro.showToast({ title: '请选择新的就诊时间', icon: 'none' })
+      return
+    }
+    Taro.showModal({
+      title: '确认改期',
+      content: `将预约时间改为 ${newDate} ${newTime}？`,
+      success: (res) => {
+        if (res.confirm) {
+          rescheduleOrder(id, newDate, newTime)
+          Taro.showToast({ title: '改期成功', icon: 'success' })
+          setShowReschedule(false)
+        }
+      }
+    })
+  }
+
   const handleCancel = () => {
     Taro.showModal({
       title: '确认取消',
-      content: '确定要取消该订单吗？',
-      success: (res) => res.confirm && Taro.showToast({ title: '取消成功', icon: 'success' })
+      content: '确定要取消该订单吗？已支付金额将在1-3个工作日原路退回。',
+      success: (res) => {
+        if (res.confirm) {
+          cancelOrder(id)
+          Taro.showToast({ title: '取消成功', icon: 'success' })
+        }
+      }
     })
   }
-  const handleSupplement = () => Taro.showToast({ title: '补充资料功能开发中', icon: 'none' })
+
+  const handlePay = () => {
+    updateOrderStatus(id, 'confirmed')
+    Taro.showToast({ title: '支付成功', icon: 'success' })
+  }
+
+  const handleSupplement = () => {
+    setShowSupplement(true)
+  }
+
+  const handleConfirmSupplement = () => {
+    if (!healthNotes && !idCard && !extraNotes) {
+      Taro.showToast({ title: '请填写补充资料', icon: 'none' })
+      return
+    }
+    supplementInfo(id, {
+      healthNotes: healthNotes || undefined,
+      idCard: idCard || undefined,
+      extraNotes: extraNotes || undefined
+    })
+    Taro.showToast({ title: '资料已提交', icon: 'success' })
+    setShowSupplement(false)
+    setHealthNotes('')
+    setIdCard('')
+    setExtraNotes('')
+  }
+
   const handleService = () => Taro.navigateTo({ url: `/pages/in-service/index?id=${order.id}` })
   const handleReview = () => Taro.navigateTo({ url: `/pages/review/index?id=${order.id}` })
   const handleInvoice = () => Taro.navigateTo({ url: `/pages/invoice/index?orderId=${order.id}` })
 
   const renderActions = () => {
     const btns = []
+    if (!order) return btns
     if (order.status === 'pending') {
       btns.push(<AppButton key="cancel" text="取消订单" type="ghost" size="lg" onClick={handleCancel} />)
-      btns.push(<AppButton key="pay" text="立即支付" type="primary" size="lg" onClick={() => Taro.showToast({ title: '支付功能开发中', icon: 'none' })} />)
+      btns.push(<AppButton key="pay" text="立即支付" type="primary" size="lg" onClick={handlePay} />)
     } else if (order.status === 'confirmed') {
       btns.push(<AppButton key="cancel" text="取消订单" type="ghost" size="lg" onClick={handleCancel} />)
       btns.push(<AppButton key="reschedule" text="申请改期" type="outline" size="lg" onClick={handleReschedule} />)
@@ -52,6 +136,14 @@ const OrderDetailPage: React.FC = () => {
       btns.push(<AppButton key="review" text="去评价" type="primary" size="lg" onClick={handleReview} />)
     }
     return btns
+  }
+
+  if (!order) {
+    return (
+      <View style={{ padding: 100, textAlign: 'center', color: '#86909C' }}>
+        <Text>订单不存在</Text>
+      </View>
+    )
   }
 
   return (
@@ -104,6 +196,12 @@ const OrderDetailPage: React.FC = () => {
             <Text className={styles.label}>联系电话</Text>
             <Text className={styles.value}>{order.patient.phone}</Text>
           </View>
+          {order.patient.healthNotes && (
+            <View className={styles.infoRow}>
+              <Text className={styles.label}>健康备注</Text>
+              <Text className={styles.value}>{order.patient.healthNotes}</Text>
+            </View>
+          )}
           {order.conditionNotes && (
             <View className={styles.infoRow}>
               <Text className={styles.label}>病情备注</Text>
@@ -141,9 +239,104 @@ const OrderDetailPage: React.FC = () => {
         </View>
       </ScrollView>
 
-      <View className={styles.footer}>
-        {renderActions()}
-      </View>
+      {renderActions().length > 0 && (
+        <View className={styles.footer}>
+          {renderActions()}
+        </View>
+      )}
+
+      {showReschedule && (
+        <View className={styles.modalMask} onClick={() => setShowReschedule(false)}>
+          <View className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>申请改期</Text>
+            <Picker mode="date" value={newDate} onChange={(e) => setNewDate(e.detail.value)}>
+              <View className={styles.formRow}>
+                <Text className={styles.formLabel}>就诊日期</Text>
+                <Text className={styles.formPicker}>{newDate} ›</Text>
+              </View>
+            </Picker>
+            <View className={styles.formRow} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Text className={styles.formLabel} style={{ marginBottom: 16 }}>就诊时间</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+                {timeSlots.map((slot) => (
+                  <Text
+                    key={slot}
+                    style={{
+                      padding: '12rpx 32rpx',
+                      borderRadius: 32,
+                      background: newTime === slot ? '#E8F7EF' : '#F2F3F5',
+                      color: newTime === slot ? '#2BA471' : '#4E5969',
+                      fontSize: 28
+                    }}
+                    onClick={() => setNewTime(slot)}
+                  >
+                    {slot}
+                  </Text>
+                ))}
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 32 }}>
+              <AppButton text="取消" type="ghost" size="lg" onClick={() => setShowReschedule(false)} />
+              <AppButton text="确认改期" type="primary" size="lg" onClick={handleConfirmReschedule} />
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showSupplement && (
+        <View className={styles.modalMask} onClick={() => setShowSupplement(false)}>
+          <View className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <Text className={styles.modalTitle}>补充资料</Text>
+            <View className={styles.formRow}>
+              <Text className={styles.formLabel}>健康情况</Text>
+            </View>
+            <Textarea
+              value={healthNotes}
+              onInput={(e) => setHealthNotes(e.detail.value)}
+              placeholder="如：过敏史、慢性病史、行动是否方便等"
+              style={{
+                width: '100%',
+                minHeight: 160,
+                background: '#F7F8FA',
+                borderRadius: 16,
+                padding: 20,
+                fontSize: 28
+              }}
+              maxlength={300}
+            />
+            <View className={styles.formRow}>
+              <Text className={styles.formLabel}>身份证号</Text>
+              <Input
+                value={idCard}
+                onInput={(e) => setIdCard(e.detail.value)}
+                placeholder="部分医院挂号需要"
+                style={{ flex: 1, fontSize: 28, textAlign: 'right' }}
+              />
+            </View>
+            <View className={styles.formRow}>
+              <Text className={styles.formLabel}>其他备注</Text>
+            </View>
+            <Textarea
+              value={extraNotes}
+              onInput={(e) => setExtraNotes(e.detail.value)}
+              placeholder="其他需要告知陪诊员的信息..."
+              style={{
+                width: '100%',
+                minHeight: 160,
+                background: '#F7F8FA',
+                borderRadius: 16,
+                padding: 20,
+                fontSize: 28
+              }}
+              maxlength={300}
+            />
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 32 }}>
+              <AppButton text="取消" type="ghost" size="lg" onClick={() => setShowSupplement(false)} />
+              <AppButton text="确认提交" type="primary" size="lg" onClick={handleConfirmSupplement} />
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   )
 }

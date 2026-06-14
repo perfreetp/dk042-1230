@@ -47,14 +47,32 @@ const CompanionCard: React.FC<CompanionCardProps> = ({ data, onClick }) => {
       </View>
 
       <View className={styles.tags}>
-        {data.tags.slice(0, 4).map((tag, idx) => (
+        {data.tags.slice(0, 3).map((tag, idx) => (
           <Tag
-            key={idx}
+            key={`t-${idx}`}
             text={tag}
             type={idx === 0 ? 'secondary' : 'primary'}
             size="sm"
           />
         ))}
+        {data.certifications.slice(0, 2).map((cert, idx) => (
+          <Tag
+            key={`c-${idx}`}
+            text={cert}
+            type="info"
+            size="sm"
+            outline
+          />
+        ))}
+      </View>
+
+      <View className={styles.slotRow}>
+        <Text className={styles.slotLabel}>今日可约：</Text>
+        <View className={styles.slotList}>
+          {data.availableSlots.map((slot) => (
+            <Text key={slot} className={styles.slotItem}>{slot}</Text>
+          ))}
+        </View>
       </View>
 
       <View className={styles.footer}>

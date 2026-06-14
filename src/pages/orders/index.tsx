@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import classnames from 'classnames'
 import Avatar from '@/components/Avatar'
 import StatusBadge from '@/components/StatusBadge'
 import AppButton from '@/components/AppButton'
-import { orders } from '@/data/orders'
+import { useOrderStore } from '@/store/order'
 import type { OrderStatus } from '@/types'
 import styles from './index.module.scss'
 
@@ -21,11 +21,19 @@ const tabs: { key: TabType; label: string }[] = [
 
 const OrdersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('all')
+  const storeOrders = useOrderStore((s) => s.orders)
+  const cancelOrder = useOrderStore((s) => s.cancelOrder)
+  const updateOrderStatus = useOrderStore((s) => s.updateOrderStatus)
+
+  useDidShow(() => {
+    console.log('[Orders] useDidShow, 订单数量:', storeOrders.length)
+  })
 
   const filteredOrders = useMemo(() => {
-    if (activeTab === 'all') return orders
-    return orders.filter((o) => o.status === activeTab)
-  }, [activeTab])
+    const sorted = [...storeOrders].sort((a, b) => b.createTime.localeCompare(a.createTime))
+    if (activeTab === 'all') return sorted
+    return sorted.filter((o) => o.status === activeTab)
+  }, [activeTab, storeOrders])
 
   const handleClickOrder = (orderId: string, status: OrderStatus) => {
     console.log('[Orders] 点击订单:', orderId)
@@ -40,27 +48,32 @@ const OrdersPage: React.FC = () => {
     console.log('[Orders] 操作:', action, orderId)
     switch (action) {
       case 'pay':
-        Taro.showToast({ title: '支付功能开发中', icon: 'none' })
+        updateOrderStatus(orderId, 'confirmed')
+        Taro.showToast({ title: '支付成功', icon: 'success' })
         break
       case 'cancel':
         Taro.showModal({
           title: '确认取消',
-          content: '确定要取消该订单吗？',
+          content: '确定要取消该订单吗？已支付的款项将在1-3个工作日原路退回。',
           success: (res) => {
             if (res.confirm) {
+              cancelOrder(orderId)
               Taro.showToast({ title: '已取消', icon: 'success' })
             }
           }
         })
         break
       case 'contact':
-        Taro.showToast({ title: '联系陪诊员', icon: 'none' })
+        Taro.showToast({ title: '正在呼叫陪诊员...', icon: 'none' })
         break
       case 'review':
         Taro.navigateTo({ url: `/pages/review/index?id=${orderId}` })
         break
       case 'invoice':
         Taro.navigateTo({ url: `/pages/invoice/index?orderId=${orderId}` })
+        break
+      case 'reschedule':
+        Taro.navigateTo({ url: `/pages/order-detail/index?id=${orderId}&action=reschedule` })
         break
     }
   }
@@ -75,7 +88,8 @@ const OrdersPage: React.FC = () => {
     } else if (status === 'confirmed') {
       btns.push(
         <AppButton key="cancel" text="取消订单" type="ghost" size="sm" onClick={() => handleAction('cancel', orderId)} />,
-        <AppButton key="contact" text="联系陪诊员" type="outline" size="sm" onClick={() => handleAction('contact', orderId)} />
+        <AppButton key="reschedule" text="申请改期" type="outline" size="sm" onClick={() => handleAction('reschedule', orderId)} />,
+        <AppButton key="contact" text="联系陪诊员" type="primary" size="sm" onClick={() => handleAction('contact', orderId)} />
       )
     } else if (status === 'in_service') {
       btns.push(

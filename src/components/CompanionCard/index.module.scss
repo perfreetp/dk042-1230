@@ -113,6 +113,37 @@
     margin-bottom: $spacing-md;
   }
 
+  .slotRow {
+    margin-bottom: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    background: $color-info-bg;
+    border-radius: $radius-md;
+
+    .slotLabel {
+      font-size: $font-size-sm;
+      color: $color-info;
+      font-weight: $font-weight-semibold;
+      margin-right: $spacing-sm;
+    }
+
+    .slotList {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+      margin-top: $spacing-xs;
+    }
+
+    .slotItem {
+      padding: 4rpx $spacing-sm;
+      background: $color-bg-card;
+      border-radius: $radius-sm;
+      font-size: $font-size-xs;
+      color: $color-info;
+      border: 1rpx solid rgba($color-info, 0.2);
+    }
+  }
+
   .footer {
     border-top: 1rpx solid $color-divider;
     padding-top: $spacing-md;

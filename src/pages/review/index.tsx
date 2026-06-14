@@ -4,7 +4,7 @@ import Taro, { useRouter } from '@tarojs/taro'
 import classnames from 'classnames'
 import Avatar from '@/components/Avatar'
 import AppButton from '@/components/AppButton'
-import { orders } from '@/data/orders'
+import { useOrderStore } from '@/store/order'
 import styles from './index.module.scss'
 
 const ratingTexts = ['', '非常差', '较差', '一般', '满意', '非常满意']
@@ -13,7 +13,9 @@ const tagOptions = ['态度很好', '专业可靠', '熟悉流程', '耐心细�
 const ReviewPage: React.FC = () => {
   const router = useRouter()
   const id = router.params.id
-  const order = useMemo(() => orders.find((o) => o.id === id) || orders.find((o) => o.status === 'completed') || orders[0], [id])
+  const storeOrders = useOrderStore((s) => s.orders)
+  const getOrder = useOrderStore((s) => s.getOrder)
+  const order = useMemo(() => getOrder(id || '') || storeOrders.find((o) => o.status === 'completed') || storeOrders[0], [id, getOrder, storeOrders])
 
   const [rating, setRating] = useState(5)
   const [selectedTags, setSelectedTags] = useState<string[]>(['态度很好', '专业可靠'])

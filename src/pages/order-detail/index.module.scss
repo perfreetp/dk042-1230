@@ -142,3 +142,55 @@
   flex-direction: row;
   gap: $spacing-md;
 }
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 999;
+
+  .modal {
+    width: 100%;
+    background: $color-bg-card;
+    border-radius: $radius-xl $radius-xl 0 0;
+    padding: $spacing-lg $page-padding calc($spacing-xl + env(safe-area-inset-bottom));
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modalTitle {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-lg;
+    text-align: center;
+  }
+
+  .formRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md 0;
+    border-bottom: 1rpx solid $color-divider;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .formLabel {
+    font-size: $font-size-md;
+    color: $color-text-secondary;
+  }
+
+  .formPicker {
+    font-size: $font-size-md;
+    color: $color-text-primary;
+  }
+}
