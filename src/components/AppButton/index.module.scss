@@ -1,0 +1,134 @@
+@use '@/styles/variables.scss' as *;
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  &.loading {
+    pointer-events: none;
+  }
+
+  &.sm {
+    height: $button-height-sm;
+    padding: 0 28rpx;
+    min-width: 120rpx;
+
+    .text {
+      font-size: $font-size-sm;
+    }
+  }
+
+  &.md {
+    height: $button-height-md;
+    padding: 0 40rpx;
+    min-width: 160rpx;
+
+    .text {
+      font-size: $font-size-md;
+    }
+  }
+
+  &.lg {
+    height: $button-height-lg;
+    padding: 0 48rpx;
+    min-width: 200rpx;
+
+    .text {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.block {
+    width: 100%;
+    height: $button-height-lg;
+    padding: 0 48rpx;
+
+    .text {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+    .text { color: $color-text-white; }
+    .spinner { border-color: rgba(255,255,255,0.3); border-top-color: $color-text-white; }
+  }
+
+  &.secondary {
+    background: linear-gradient(135deg, $color-secondary-light 0%, $color-secondary 100%);
+    .text { color: $color-text-white; }
+    .spinner { border-color: rgba(255,255,255,0.3); border-top-color: $color-text-white; }
+  }
+
+  &.outline {
+    background: transparent;
+    border: 2rpx solid $color-primary;
+    .text { color: $color-primary; }
+    .spinner { border-color: rgba(43,164,113,0.2); border-top-color: $color-primary; }
+  }
+
+  &.ghost {
+    background: $color-primary-bg;
+    .text { color: $color-primary; }
+    .spinner { border-color: rgba(43,164,113,0.2); border-top-color: $color-primary; }
+  }
+
+  &.danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, $color-error 100%);
+    .text { color: $color-text-white; }
+    .spinner { border-color: rgba(255,255,255,0.3); border-top-color: $color-text-white; }
+  }
+
+  .nativeBtn {
+    @include button-reset;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    border-radius: $radius-button;
+    opacity: 0;
+
+    &::after {
+      border: none;
+    }
+  }
+
+  .text {
+    font-weight: $font-weight-medium;
+  }
+
+  .spinner {
+    width: 32rpx;
+    height: 32rpx;
+    margin-right: 12rpx;
+    border-radius: 50%;
+    border: 3rpx solid;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

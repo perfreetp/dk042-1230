@@ -1,0 +1,156 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: $color-bg-card;
+  padding: 0 $page-padding;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  border-bottom: 1rpx solid $color-divider;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+
+  .tab {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 96rpx;
+    padding: 0 $spacing-md;
+    position: relative;
+    margin-right: $spacing-sm;
+
+    .tabText {
+      font-size: $font-size-md;
+      color: $color-text-secondary;
+      transition: all $transition-fast;
+    }
+
+    .badge {
+      position: absolute;
+      top: 16rpx;
+      right: 8rpx;
+      min-width: 32rpx;
+      height: 32rpx;
+      padding: 0 8rpx;
+      border-radius: 16rpx;
+      background: $color-error;
+      color: $color-text-white;
+      font-size: 20rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.active {
+      .tabText {
+        color: $color-primary;
+        font-weight: $font-weight-semibold;
+        font-size: $font-size-lg;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 48rpx;
+        height: 6rpx;
+        background: $color-primary;
+        border-radius: 3rpx;
+      }
+    }
+  }
+}
+
+.messageList {
+  padding: $spacing-md $page-padding;
+
+  .messageCard {
+    background: $color-bg-card;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-card;
+    margin-bottom: $spacing-md;
+
+    .cardHeader {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      margin-bottom: $spacing-sm;
+
+      .iconBox {
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: $radius-md;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: $spacing-md;
+        font-size: 36rpx;
+        flex-shrink: 0;
+      }
+
+      &.trip .iconBox { background: $color-primary-bg; color: $color-primary; }
+      &.doctor .iconBox { background: $color-info-bg; color: $color-info; }
+      &.medicine .iconBox { background: $color-secondary-bg; color: $color-secondary; }
+      &.followup .iconBox { background: rgba(0,180,42,0.1); color: $color-success; }
+      &.system .iconBox { background: $color-bg-hover; color: $color-text-secondary; }
+
+      .headerContent {
+        flex: 1;
+
+        .title {
+          font-size: $font-size-md;
+          font-weight: $font-weight-semibold;
+          color: $color-text-primary;
+          margin-bottom: $spacing-xs;
+        }
+
+        .time {
+          font-size: $font-size-xs;
+          color: $color-text-tertiary;
+        }
+      }
+
+      .unreadDot {
+        width: 16rpx;
+        height: 16rpx;
+        border-radius: 50%;
+        background: $color-error;
+        margin-top: 8rpx;
+        flex-shrink: 0;
+      }
+    }
+
+    .cardBody {
+      padding-left: 104rpx;
+
+      .content {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        line-height: $line-height-normal;
+      }
+    }
+  }
+}
+
+.empty {
+  padding: 200rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .emptyText {
+    font-size: $font-size-md;
+    color: $color-text-tertiary;
+  }
+}

@@ -1,0 +1,74 @@
+@use '@/styles/variables.scss' as *;
+
+.filterBar {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+
+  .scroll {
+    @include scroll-x-container;
+    width: 100%;
+  }
+
+  .inner {
+    @include scroll-x-item(auto);
+    padding: $spacing-md $spacing-lg;
+    white-space: nowrap;
+  }
+
+  .filterGroup {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    margin-right: $spacing-lg;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .groupLabel {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+    flex-shrink: 0;
+  }
+
+  .options {
+    display: inline-flex;
+    flex-direction: row;
+    gap: $spacing-sm;
+    margin-left: $spacing-sm;
+  }
+
+  .option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10rpx 24rpx;
+    border-radius: $radius-button;
+    background: $color-bg-hover;
+    transition: all $transition-fast;
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    &.active {
+      background: $color-primary-bg;
+
+      .optionText {
+        color: $color-primary;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    .optionText {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      white-space: nowrap;
+    }
+  }
+}

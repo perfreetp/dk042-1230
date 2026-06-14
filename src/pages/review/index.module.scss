@@ -1,0 +1,128 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 180rpx;
+}
+
+.section {
+  margin: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .sectionTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.companionRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .info {
+    flex: 1;
+    margin-left: $spacing-md;
+
+    .name {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .sub {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.ratingRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg 0;
+
+  .stars {
+    display: flex;
+    flex-direction: row;
+    gap: $spacing-md;
+  }
+
+  .star {
+    font-size: 64rpx;
+    color: $color-border;
+    transition: all $transition-fast;
+
+    &.active {
+      color: #FFB800;
+    }
+  }
+
+  .ratingText {
+    margin-left: $spacing-lg;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-secondary;
+  }
+}
+
+.tagGroup {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+
+  .tagItem {
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-button;
+    background: $color-bg-hover;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    transition: all $transition-fast;
+
+    &.active {
+      background: $color-primary-bg;
+      color: $color-primary;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+.textareaRow {
+  .textarea {
+    width: 100%;
+    min-height: 240rpx;
+    background: $color-bg-page;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    font-size: $font-size-md;
+    color: $color-text-primary;
+    line-height: $line-height-normal;
+  }
+
+  .counter {
+    text-align: right;
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-top: $spacing-xs;
+  }
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.06);
+}

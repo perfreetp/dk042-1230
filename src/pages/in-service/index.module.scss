@@ -1,0 +1,209 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 140rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-lg $page-padding;
+  color: $color-text-white;
+
+  .patientInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    .info {
+      flex: 1;
+      margin-left: $spacing-md;
+
+      .patientName {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-xs;
+      }
+
+      .hospital {
+        font-size: $font-size-sm;
+        opacity: 0.85;
+      }
+    }
+
+    .contactBtn {
+      padding: 16rpx 32rpx;
+      border-radius: $radius-button;
+      background: rgba(255,255,255,0.2);
+      font-size: $font-size-sm;
+    }
+  }
+
+  .checkInBar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.15);
+    border-radius: $radius-md;
+    padding: $spacing-md $spacing-lg;
+
+    .checkInText {
+      font-size: $font-size-md;
+    }
+
+    .checkInBtn {
+      padding: 12rpx 28rpx;
+      border-radius: $radius-button;
+      background: $color-text-white;
+      color: $color-primary;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+
+      &.checked {
+        background: rgba(255,255,255,0.3);
+        color: $color-text-white;
+      }
+    }
+  }
+}
+
+.section {
+  margin: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .sectionTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.reminderList {
+  .reminderItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: $spacing-md 0;
+    border-bottom: 1rpx solid $color-divider;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .iconBox {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: $radius-md;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: $spacing-md;
+      font-size: 32rpx;
+      flex-shrink: 0;
+    }
+
+    &.check .iconBox { background: $color-primary-bg; }
+    &.medicine .iconBox { background: $color-secondary-bg; }
+    &.other .iconBox { background: $color-info-bg; }
+
+    .content {
+      flex: 1;
+
+      .title {
+        font-size: $font-size-md;
+        color: $color-text-primary;
+        margin-bottom: $spacing-xs;
+      }
+
+      .sub {
+        font-size: $font-size-sm;
+        color: $color-text-tertiary;
+      }
+    }
+
+    .status {
+      font-size: $font-size-sm;
+
+      &.done { color: $color-success; }
+      &.pending { color: $color-text-tertiary; }
+    }
+  }
+}
+
+.updateList {
+  .updateItem {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: $spacing-md;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .avatar {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: 50%;
+      margin-right: $spacing-md;
+      flex-shrink: 0;
+    }
+
+    .bubble {
+      flex: 1;
+      background: $color-bg-page;
+      border-radius: $radius-md;
+      padding: $spacing-md;
+
+      .time {
+        font-size: $font-size-xs;
+        color: $color-text-tertiary;
+        margin-bottom: $spacing-xs;
+      }
+
+      .text {
+        font-size: $font-size-md;
+        color: $color-text-primary;
+        line-height: $line-height-normal;
+      }
+
+      .image {
+        width: 100%;
+        height: 360rpx;
+        border-radius: $radius-md;
+        margin-top: $spacing-sm;
+      }
+    }
+  }
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding calc($spacing-md + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+}
+
+.inputBar {
+  flex: 1;
+  height: 80rpx;
+  background: $color-bg-page;
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

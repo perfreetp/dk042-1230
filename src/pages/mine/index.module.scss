@@ -1,0 +1,112 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $page-padding $spacing-xl * 2;
+  border-radius: 0 0 40rpx 40rpx;
+
+  .userRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+  }
+
+  .userInfo {
+    flex: 1;
+    margin-left: $spacing-lg;
+
+    .name {
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      color: $color-text-white;
+      margin-bottom: $spacing-xs;
+    }
+
+    .phone {
+      font-size: $font-size-sm;
+      color: rgba(255,255,255,0.8);
+    }
+  }
+
+  .stats {
+    display: flex;
+    flex-direction: row;
+    background: rgba(255,255,255,0.15);
+    border-radius: $radius-lg;
+    padding: $spacing-md;
+
+    .statItem {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .statNum {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+        color: $color-text-white;
+        margin-bottom: 4rpx;
+      }
+
+      .statLabel {
+        font-size: $font-size-xs;
+        color: rgba(255,255,255,0.85);
+      }
+    }
+  }
+}
+
+.section {
+  margin: -$spacing-lg $page-padding $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md 0;
+  box-shadow: $shadow-card;
+
+  .sectionTitle {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+    padding: 0 $spacing-lg $spacing-sm;
+  }
+
+  .menuItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+    transition: background $transition-fast;
+
+    &:active {
+      background: $color-bg-hover;
+    }
+
+    .menuIcon {
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: $radius-sm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: $spacing-md;
+      font-size: 32rpx;
+    }
+
+    .menuLabel {
+      flex: 1;
+      font-size: $font-size-md;
+      color: $color-text-primary;
+    }
+
+    .menuArrow {
+      font-size: $font-size-md;
+      color: $color-text-tertiary;
+    }
+  }
+}

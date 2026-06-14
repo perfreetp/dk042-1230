@@ -1,0 +1,118 @@
+@use '@/styles/variables.scss' as *;
+
+.timeline {
+  padding: $spacing-sm 0;
+
+  .item {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding-bottom: $spacing-lg;
+
+    &:last-child {
+      padding-bottom: 0;
+
+      .line {
+        display: none;
+      }
+    }
+
+    .dotWrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: $spacing-md;
+      width: 32rpx;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      width: 20rpx;
+      height: 20rpx;
+      border-radius: $radius-round;
+      background: $color-border;
+      border: 4rpx solid $color-bg-card;
+      box-shadow: 0 0 0 2rpx $color-border;
+      margin-top: 6rpx;
+
+      &.done {
+        background: $color-success;
+        box-shadow: 0 0 0 2rpx $color-success;
+      }
+
+      &.current {
+        background: $color-primary;
+        box-shadow: 0 0 0 6rpx rgba(43, 164, 113, 0.2);
+        animation: pulse 2s ease-in-out infinite;
+      }
+    }
+
+    .line {
+      width: 2rpx;
+      flex: 1;
+      min-height: 40rpx;
+      background: $color-border;
+      margin-top: $spacing-xs;
+    }
+
+    &.done .line {
+      background: $color-success;
+    }
+
+    &.current .line {
+      background: linear-gradient(180deg, $color-success 0%, $color-border 100%);
+    }
+
+    .content {
+      flex: 1;
+      padding-bottom: $spacing-xs;
+
+      .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-xs;
+
+        .title {
+          font-size: $font-size-md;
+          font-weight: $font-weight-semibold;
+          color: $color-text-primary;
+        }
+
+        .time {
+          font-size: $font-size-sm;
+          color: $color-text-tertiary;
+        }
+      }
+
+      .desc {
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+        line-height: $line-height-normal;
+      }
+    }
+
+    &.pending {
+      .content .header .title,
+      .content .desc {
+        color: $color-text-disabled;
+      }
+    }
+
+    &.current {
+      .content .header .title {
+        color: $color-primary;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 6rpx rgba(43, 164, 113, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 12rpx rgba(43, 164, 113, 0.1);
+  }
+}
